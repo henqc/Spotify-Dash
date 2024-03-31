@@ -35,8 +35,10 @@ def home():
 
 @app.route('/callback')
 def callback():
-    sp_oauth.get_access_token(request.args['code'])
-    return redirect(url_for('get_playlists'))
+    code = request.args.get('code')
+    token_info = sp_oauth.get_access_token(code)
+    session['token_info'] = token_info  # You could instead send this info to your frontend
+    return redirect('http://localhost:3000?login=success')  # Replace with your actual frontend URL
 
 @app.route('/get_playlists')
 def get_playlists():
@@ -45,10 +47,13 @@ def get_playlists():
         return redirect(auth_url)
 
     playlists = sp.current_user_playlists()
-    #playlist_info = [(pl['name'], pl['external_urls']['spotify']) for pl in playlists['items']]
-    #playlists_html = '<br>'.join([f'{name}: {url}' for name, url in playlist_info])
 
     return jsonify(playlists)
+
+@app.route('/login')
+def login():
+    auth_url = sp_oauth.get_authorize_url()
+    return jsonify({'auth_url': auth_url})
 
 @app.route('/logout')
 def logout():
