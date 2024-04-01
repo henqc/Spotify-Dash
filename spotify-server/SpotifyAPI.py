@@ -4,13 +4,16 @@ from spotipy import Spotify
 from spotipy.oauth2 import SpotifyOAuth
 from spotipy.cache_handler import FlaskSessionCacheHandler
 from flask_cors import CORS
+from dotenv import load_dotenv
+
+load_dotenv()
 
 app = Flask(__name__)
 CORS(app)
-app.config['SECRET_KEY'] = os.urandom(64)
+app.config['SECRET_KEY'] = os.getenv('SECRET_KEY')
 
-client_id = 'e98f525a1a6343faac615e46411e97bd'
-client_secret = 'eebaf1ea30ab47a7a1460fb07cbcf334'
+client_id = os.getenv('CLIENT_ID')
+client_secret = os.getenv('CLIENT_SECRET')
 redirect_uri = 'http://localhost:8000/callback'
 scope = 'playlist-read-private'
 
@@ -29,15 +32,14 @@ sp = Spotify(auth_manager=sp_oauth)
 @app.route('/')
 def home():
     if not sp_oauth.validate_token(cache_handler.get_cached_token()):
-        auth_url = sp_oauth.get_authorize_url()
-        return redirect(auth_url)
-    return redirect(url_for('get_playlists'))
+        return jsonify({"logged_in": False})
+    return jsonify({"logged_in": True})
 
 @app.route('/callback')
 def callback():
     code = request.args.get('code')
     token_info = sp_oauth.get_access_token(code)
-    session['token_info'] = token_info  # You could instead send this info to your frontend
+    session['token_info'] = token_info  
     return redirect('http://localhost:3000?login=success')  # Replace with your actual frontend URL
 
 @app.route('/get_playlists')
@@ -59,7 +61,6 @@ def login():
 def logout():
     session.clear()
     return redirect(url_for('home'))
-
 
 if __name__ == '__main__':
     app.run(debug=True, port=8000) 
