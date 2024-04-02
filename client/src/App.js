@@ -5,24 +5,27 @@ function App() {
   const [playlists, setPlaylists] = useState([]);
 
   useEffect(() => {
-    if (checkAuthenticationStatus()) {
-      fetch("/get_playlists")
-        .then((response) => response.json())
-        .then((data) => {
-          setPlaylists(data);
-          console.log(data);
-        });
-    }
-    // Fetch playlists from Flask backend
-  }, []); // Empty dependency array means this effect runs once on mount
-
-  const checkAuthenticationStatus = () => {
-    const searchParams = new URLSearchParams(window.location.search);
-    if (searchParams.has("login")) {
-      if (searchParams.get("login") === "success") {
-        setIsLoggedIn(true);
-        return true;
+    const fetchData = async () => {
+      const isAuthenticated = await checkAuthenticationStatus();
+      if (isAuthenticated) {
+        const response = await fetch("/get_playlists");
+        const data = await response.json();
+        setPlaylists(data);
+        console.log(data);
       }
+    };
+    fetchData();
+  }, []);
+
+  const checkAuthenticationStatus = async () => {
+    const response = await fetch("/verify");
+    const data = await response.json();
+    if (data.logged_in) {
+      setIsLoggedIn(true);
+      return true;
+    } else {
+      setIsLoggedIn(false);
+      return false;
     }
   };
 
@@ -34,6 +37,12 @@ function App() {
       });
   };
 
+  const handleLogout = () => {
+    fetch("/logout").then(() => {
+      setIsLoggedIn(false);
+    });
+  };
+
   return (
     <div>
       {!isLoggedIn ? (
@@ -41,6 +50,7 @@ function App() {
       ) : (
         // Render playlists or other content for logged-in users
         <div>
+          <button onClick={handleLogout}>Logout</button>
           {typeof playlists.items === "undefined" ? (
             <p>Loading...</p>
           ) : (

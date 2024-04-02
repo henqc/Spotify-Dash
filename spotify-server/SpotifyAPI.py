@@ -1,11 +1,10 @@
 import os
-from flask import Flask, session, redirect, url_for, request, jsonify
+from flask import Flask, session, redirect, url_for, request, jsonify, make_response
 from spotipy import Spotify
 from spotipy.oauth2 import SpotifyOAuth
 from spotipy.cache_handler import FlaskSessionCacheHandler
 from flask_cors import CORS
 from dotenv import load_dotenv
-
 load_dotenv()
 
 app = Flask(__name__)
@@ -39,8 +38,9 @@ def home():
 def callback():
     code = request.args.get('code')
     token_info = sp_oauth.get_access_token(code)
-    session['token_info'] = token_info  
-    return redirect('http://localhost:3000?login=success')  # Replace with your actual frontend URL
+    response = make_response(redirect('http://localhost:3000'))  # Replace with your actual frontend URL
+    response.set_cookie('token_info', str(token_info), httponly=True)
+    return response
 
 @app.route('/get_playlists')
 def get_playlists():
@@ -59,8 +59,18 @@ def login():
 
 @app.route('/logout')
 def logout():
+    response = make_response('http://localhost:3000')
+    response.delete_cookie('token_info')
     session.clear()
-    return redirect(url_for('home'))
+    return response
+
+@app.route('/verify')
+def verify():
+    token_info = session.get('token_info', None)
+    if token_info is not None and sp_oauth.validate_token(token_info):
+        return jsonify({"logged_in": True})
+    else:
+        return jsonify({"logged_in": False})
 
 if __name__ == '__main__':
     app.run(debug=True, port=8000) 
