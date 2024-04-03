@@ -1,21 +1,22 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 
 function App() {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [playlists, setPlaylists] = useState([]);
 
-  useEffect(() => {
-    const fetchData = async () => {
-      const isAuthenticated = await checkAuthenticationStatus();
-      if (isAuthenticated) {
-        const response = await fetch("/get_playlists");
-        const data = await response.json();
-        setPlaylists(data);
-        console.log(data);
-      }
-    };
-    fetchData();
+  const fetchData = useCallback(async () => {
+    const isAuthenticated = await checkAuthenticationStatus();
+    if (isAuthenticated) {
+      const response = await fetch("/get_playlists");
+      const data = await response.json();
+      setPlaylists(data);
+      console.log(data);
+    }
   }, []);
+
+  useEffect(() => {
+    fetchData();
+  }, [fetchData]);
 
   const checkAuthenticationStatus = async () => {
     const response = await fetch("/verify");
@@ -29,18 +30,23 @@ function App() {
     }
   };
 
-  const handleLogin = () => {
-    fetch("/login")
-      .then((response) => response.json())
-      .then((data) => {
-        window.location.href = data.auth_url;
-      });
+  const handleLogin = async () => {
+    try {
+      const response = await fetch("/login");
+      const data = await response.json();
+      window.location.href = data.auth_url;
+    } catch (error) {
+      console.error("Error during login:", error);
+    }
   };
 
-  const handleLogout = () => {
-    fetch("/logout").then(() => {
+  const handleLogout = async () => {
+    try {
+      await fetch("/logout");
       setIsLoggedIn(false);
-    });
+    } catch (error) {
+      console.error("Error during logout:", error);
+    }
   };
 
   return (
@@ -48,7 +54,6 @@ function App() {
       {!isLoggedIn ? (
         <button onClick={handleLogin}>Login with Spotify</button>
       ) : (
-        // Render playlists or other content for logged-in users
         <div>
           <button onClick={handleLogout}>Logout</button>
           {typeof playlists.items === "undefined" ? (

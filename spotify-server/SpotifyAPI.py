@@ -1,3 +1,4 @@
+import json
 import os
 from flask import Flask, session, redirect, url_for, request, jsonify, make_response
 from spotipy import Spotify
@@ -5,6 +6,7 @@ from spotipy.oauth2 import SpotifyOAuth
 from spotipy.cache_handler import FlaskSessionCacheHandler
 from flask_cors import CORS
 from dotenv import load_dotenv
+from datetime import datetime, timedelta
 load_dotenv()
 
 app = Flask(__name__)
@@ -37,9 +39,8 @@ def home():
 @app.route('/callback')
 def callback():
     code = request.args.get('code')
-    token_info = sp_oauth.get_access_token(code)
+    sp_oauth.get_access_token(code)
     response = make_response(redirect('http://localhost:3000'))  # Replace with your actual frontend URL
-    response.set_cookie('token_info', str(token_info), httponly=True)
     return response
 
 @app.route('/get_playlists')
