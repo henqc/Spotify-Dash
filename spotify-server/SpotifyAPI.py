@@ -61,7 +61,6 @@ def login():
 @app.route('/logout')
 def logout():
     response = make_response('http://localhost:3000')
-    response.delete_cookie('token_info')
     session.clear()
     return response
 
