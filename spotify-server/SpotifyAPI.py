@@ -53,6 +53,17 @@ def get_playlists():
 
     return jsonify(playlists)
 
+@app.route('/get_playlist_songs')
+def get_playlist_songs():
+    if not sp_oauth.validate_token(cache_handler.get_cached_token()):
+        auth_url = sp_oauth.get_authorize_url()
+        return redirect(auth_url)
+
+    playlist_id = request.args.get('playlist_id')
+    tracks = sp.playlist_tracks(playlist_id, fields=None, limit=100, offset=0, market=None, additional_types=('track', ))
+
+    return jsonify(tracks)
+
 @app.route('/login')
 def login():
     auth_url = sp_oauth.get_authorize_url()
