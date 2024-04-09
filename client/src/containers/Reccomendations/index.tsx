@@ -13,14 +13,19 @@ const Reccomendations = () => {
     const isAuthenticated = await checkAuthenticationStatus();
     if (isAuthenticated) {
       const data = await API.getTracks(id);
-      const trackData = data.items.map((item: any) => ({
-        id: item.track.id,
-        external_urls: item.track.external_urls.spotify,
-        name: item.track.name,
-      }));
+      const trackDataPromises = data.items.map(async (item: any) => {
+        const analysis = await API.getAudioAnalysis(item.track.id);
+        return {
+          id: item.track.id,
+          external_urls: item.track.external_urls.spotify,
+          name: item.track.name,
+          analysis: analysis,
+        };
+      });
+      const trackData = await Promise.all(trackDataPromises);
       setTracks(trackData);
       console.log(data);
-      console.log(tracks);
+      console.log(trackData);
     }
   }, []);
 

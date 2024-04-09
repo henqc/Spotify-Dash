@@ -9,4 +9,5 @@ export type Track = {
   name: string;
   external_urls: string;
   id: string;
+  analysis: JSON;
 };

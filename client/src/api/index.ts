@@ -10,6 +10,12 @@ const getTracks = async (playlistId) => {
   return data;
 };
 
+const getAudioAnalysis = async (trackId) => {
+  const response = await fetch(`/get_audio_analysis?track_id=${trackId}`);
+  const data = await response.json();
+  return data;
+};
+
 const verify = async () => {
   const response = await fetch("/verify");
   const data = await response.json();
@@ -33,4 +39,11 @@ const logout = async (
   }
 };
 
-export const API = { getPlaylists, verify, login, logout, getTracks };
+export const API = {
+  getPlaylists,
+  verify,
+  login,
+  logout,
+  getTracks,
+  getAudioAnalysis,
+};

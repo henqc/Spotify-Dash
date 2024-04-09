@@ -64,6 +64,17 @@ def get_playlist_songs():
 
     return jsonify(tracks)
 
+@app.route('/get_audio_analysis')
+def get_audio_analysis():
+    if not sp_oauth.validate_token(cache_handler.get_cached_token()):
+        auth_url = sp_oauth.get_authorize_url()
+        return redirect(auth_url)
+
+    track_id = request.args.get('track_id')
+    analysis = sp.audio_features(track_id)
+
+    return jsonify(analysis)
+
 @app.route('/login')
 def login():
     auth_url = sp_oauth.get_authorize_url()

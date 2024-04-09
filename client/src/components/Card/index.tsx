@@ -7,13 +7,11 @@ const Card = ({ playlist }: { playlist: Playlist }) => {
   const { id, name, description, images } = playlist;
 
   return (
-    <Link to={`/Playlists/${id}`} className="card-link">
-      <div className="card">
-        <img className="card-image" src={images} alt={name} />
-        <div className="card-content">
-          <div className="card-title">{name}</div>
-          <div className="card-description">{description}</div>
-        </div>
+    <Link to={`/Playlists/${id}`} className="card">
+      <img className="card-image" src={images} alt={name} />
+      <div className="card-content">
+        <div className="card-title">{name}</div>
+        <div className="card-description">{description}</div>
       </div>
     </Link>
   );
