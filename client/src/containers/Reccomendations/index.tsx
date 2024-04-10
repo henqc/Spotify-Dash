@@ -1,9 +1,11 @@
 import React, { useCallback, useEffect, useState } from "react";
+import { Link, useNavigate } from "react-router-dom";
 import { useParams } from "react-router-dom";
 import { Track } from "../../utils/types";
 import { API } from "../../api/index.ts";
 
 const Reccomendations = () => {
+  const navigate = useNavigate();
   const { id } = useParams<{ id: string }>();
 
   const [isLoggedIn, setIsLoggedIn] = useState<boolean>(false);
@@ -11,7 +13,8 @@ const Reccomendations = () => {
 
   const fetchData = useCallback(async () => {
     const isAuthenticated = await checkAuthenticationStatus();
-    if (isAuthenticated) {
+    if (!isAuthenticated) navigate("/");
+    else {
       const data = await API.getTracks(id);
       const trackDataPromises = data.items.map(async (item: any) => {
         const analysis = await API.getAudioAnalysis(item.track.id);
@@ -47,19 +50,28 @@ const Reccomendations = () => {
   return (
     <div>
       {!isLoggedIn ? (
+        // Somtimes displays while re rendering playlists from reccomendations
         <div>No User</div>
       ) : (
         <div>
           {!tracks ? (
             <p>Loading...</p>
           ) : (
-            <ul>
-              {tracks.map((track, index) => (
-                <li
-                  key={index}
-                >{`${track.name}  URL -------->  ${track.external_urls}`}</li>
-              ))}
-            </ul>
+            <div>
+              <Link to="/">
+                <button>Home</button>
+              </Link>
+              <Link to="/Playlists">
+                <button>Playlists</button>
+              </Link>
+              <ul>
+                {tracks.map((track, index) => (
+                  <li
+                    key={index}
+                  >{`${track.name}  URL -------->  ${track.external_urls}`}</li>
+                ))}
+              </ul>
+            </div>
           )}
         </div>
       )}

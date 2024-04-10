@@ -1,26 +1,24 @@
 import React, { useState, useEffect, useCallback } from "react";
+import { User } from "../../utils/types";
 import { API } from "../../api/index.ts";
-import { Playlist } from "../../utils/types";
+import UserCard from "../../components/UserCard/index.tsx";
+import { Link } from "react-router-dom";
 
 export default function Home() {
   const [isLoggedIn, setIsLoggedIn] = useState<boolean>(false);
-  const [playlists, setPlaylists] = useState<Playlist[]>(
-    undefined as any as Playlist[]
-  );
+  const [user, setUser] = useState<User>();
 
   const fetchData = useCallback(async () => {
     const isAuthenticated = await checkAuthenticationStatus();
     if (isAuthenticated) {
-      const data = await API.getPlaylists();
-      const playlistsData = data.items.map((item: any) => ({
-        id: item.id,
-        name: item.name,
-        description: item.description,
-        external_urls: item.external_urls,
-      }));
-      setPlaylists(playlistsData);
-      console.log(data);
-      console.log(playlists);
+      const data = await API.getUser();
+      const user = {
+        id: data.id,
+        name: data.display_name,
+        external_urls: data.external_urls.spotify,
+        image: data.images[0].url,
+      };
+      setUser(user);
     }
   }, []);
 
@@ -58,18 +56,11 @@ export default function Home() {
         <button onClick={handleLogin}>Login with Spotify</button>
       ) : (
         <div>
+          {!user ? <p>Loading...</p> : <UserCard user={user} />}
+          <Link to="/Playlists">
+            <button>Get Started</button>
+          </Link>
           <button onClick={handleLogout}>Logout</button>
-          {!playlists ? (
-            <p>Loading...</p>
-          ) : (
-            <ul>
-              {playlists.map((playlist, index) => (
-                <li key={index}>
-                  {`${playlist.name}  Description ----->  ${playlist.description}`}
-                </li>
-              ))}
-            </ul>
-          )}
         </div>
       )}
     </div>

@@ -1,3 +1,9 @@
+const getUser = async () => {
+  const response = await fetch("/get_user");
+  const data = await response.json();
+  return data;
+};
+
 const getPlaylists = async () => {
   const response = await fetch("/get_playlists");
   const data = await response.json();
@@ -46,4 +52,5 @@ export const API = {
   logout,
   getTracks,
   getAudioAnalysis,
+  getUser,
 };

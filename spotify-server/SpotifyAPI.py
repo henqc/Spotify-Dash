@@ -6,7 +6,6 @@ from spotipy.oauth2 import SpotifyOAuth
 from spotipy.cache_handler import FlaskSessionCacheHandler
 from flask_cors import CORS
 from dotenv import load_dotenv
-from datetime import datetime, timedelta
 load_dotenv()
 
 app = Flask(__name__)
@@ -40,8 +39,18 @@ def home():
 def callback():
     code = request.args.get('code')
     sp_oauth.get_access_token(code)
-    response = make_response(redirect('http://localhost:3000'))  # Replace with your actual frontend URL
+    response = make_response(redirect('http://localhost:3000/')) 
     return response
+
+@app.route('/get_user')
+def get_user():
+    if not sp_oauth.validate_token(cache_handler.get_cached_token()):
+        auth_url = sp_oauth.get_authorize_url()
+        return redirect(auth_url)
+
+    user = sp.current_user()
+
+    return jsonify(user)
 
 @app.route('/get_playlists')
 def get_playlists():

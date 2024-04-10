@@ -11,3 +11,10 @@ export type Track = {
   id: string;
   analysis: JSON;
 };
+
+export type User = {
+  id: string;
+  name: string;
+  external_urls: string;
+  image: string;
+};

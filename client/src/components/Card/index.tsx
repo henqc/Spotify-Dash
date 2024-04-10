@@ -7,7 +7,7 @@ const Card = ({ playlist }: { playlist: Playlist }) => {
   const { id, name, description, images } = playlist;
 
   return (
-    <Link to={`/Playlists/${id}`} className="card">
+    <Link className="card" to={`/Playlists/${id}`}>
       <img className="card-image" src={images} alt={name} />
       <div className="card-content">
         <div className="card-title">{name}</div>
